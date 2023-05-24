@@ -7,20 +7,18 @@
   }
 */
 
-const db = require("../../data/db-config");
+const schemeModel = require("./scheme-model");
 
 const checkSchemeId = async (req, res, next) => {
   try {
-    const isExist = await db("schemes")
-      .where("schema_id", req.params.scheme_id)
-      .first();
+    const isExist = await schemeModel.findById(req.params.scheme_id);
 
     if (!isExist) {
       res.status(404).json({
         message: `scheme_id ${req.params.scheme_id} id li şema bulunamadı`,
       });
     } else {
-      req.scheme = isExist;
+      req.currentScheme = isExist;
       next();
     }
   } catch (error) {
@@ -36,23 +34,23 @@ const checkSchemeId = async (req, res, next) => {
     "message": "Geçersiz scheme_name"
   }
 */
-const validateScheme = (req, res, next) => {};
+const validateScheme = (req, res, next) => {
+  try {
+    const { scheme_name } = req.body;
 
-try {
-  const { scheme_name } = req.body;
-
-  if (
-    scheme_name === undefined ||
-    typeof scheme_name !== "string" ||
-    scheme_name.trim() === ""
-  ) {
-    res.status(400).json({ message: "Geçersiz scheme_name" });
-  } else {
-    next();
+    if (
+      scheme_name === undefined ||
+      typeof scheme_name !== "string" ||
+      scheme_name.trim() === ""
+    ) {
+      res.status(400).json({ message: "Geçersiz scheme_name" });
+    } else {
+      next();
+    }
+  } catch (error) {
+    next(error);
   }
-} catch (error) {
-  next(error);
-}
+};
 
 /*
   Eğer `instructions` yoksa, boş string yada string değilse, ya da
